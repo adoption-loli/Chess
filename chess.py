@@ -152,21 +152,22 @@ class game():
         # x = int(input('x：')) - 1
         # y = int(input('y：')) - 1
         start_point = [y, x]
-        print('to')
+        # print('to')
         # tx = int(input('x：')) - 1
         # ty = int(input('y：')) - 1
         end_point = [ty, tx]
         # 调用检查落子函数
-        if self.inboard(end_point):
-            if self.chessboard[y][x].attr:
-                if self.chessboard[y][x].move(start_point, end_point, self.chessboard):
-                    # 成功移动判断是否吃子
-                    if self.chessboard[ty][tx].attr:
-                        if self.chessboard[ty][tx].attr != self.chessboard[y][x].attr:
-                            self.chessboard[ty][tx].die()
-                            return '{attr}{name}被吃了'.format(attr=self.chessboard[ty][tx].attr,
-                                                            name=self.chessboard[ty][tx].name)
-                    return True
+        if self.inboard(end_point) and self.chessboard[y][x].attr:
+            if self.chessboard[ty][tx].attr:
+                if self.chessboard[ty][tx].attr == self.chessboard[y][x].attr:
+                    return False
+            if self.chessboard[y][x].move(start_point, end_point, self.chessboard):
+                # 成功移动判断是否吃子
+                if self.chessboard[ty][tx].attr:
+                    self.chessboard[ty][tx].die()
+                    return '{attr}{name}被吃了'.format(attr=self.chessboard[ty][tx].attr,
+                                                    name=self.chessboard[ty][tx].name)
+                return True
         return False
 
     def computer(self):
