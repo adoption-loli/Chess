@@ -181,8 +181,12 @@ class game():
         return False
 
     def promotion(self):
-        # 兵升变
-        pass
+        for i in range(8):
+            if self.chessboard[0][i].attr == '白' and self.chessboard[0][i].name == '兵':
+                return [0, i]
+            if self.chessboard[7][i].attr == '黑' and self.chessboard[7][i].name == '兵':
+                return [7, i]
+        return False
 
     def game_over(self):
         if not (self.pieces['bk'].alive):
@@ -190,6 +194,12 @@ class game():
         if not (self.pieces['wk'].alive):
             return '黑棋获胜'
         return False
+
+    def get_chess(self, pos):
+        aim = self.chessboard[pos[0]][pos[1]]
+        for cell in self.pieces:
+            if self.pieces[cell] == aim:
+                return cell
 
 
 class King_white():

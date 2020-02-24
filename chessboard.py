@@ -35,6 +35,9 @@ def main():
     delay = 30 * 3
     die_code = ''
     score = {'black': 0, 'white': 0}
+    promotion = False
+    promotion_choies = [chess.Queen_white(), chess.Bishop_white(), chess.King_white(), chess.Rook_white(),
+                        chess.Queen_black(), chess.Bishop_black(), chess.King_black(), chess.Rook_black()]
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -48,10 +51,38 @@ def main():
                 elif 'blackwin' in die_code:
                     game.pieces['wk'].alive = False
                     die_code = ''
+                elif 'whitepromotion' in die_code:
+                    for cell in range(1, 9):
+                        pos = game.pieces['wp' + str(cell)].pos
+                        game.pieces['wp' + str(cell)] = chess.Queen_white()
+                        game.pieces['wp' + str(cell)].pos = pos
+                    die_code = ''
+                elif 'blackpromotion' in die_code:
+                    for cell in range(1, 9):
+                        pos = game.pieces['bp' + str(cell)].pos
+                        game.pieces['bp' + str(cell)] = chess.Queen_black()
+                        game.pieces['bp' + str(cell)].pos = pos
+                    die_code = ''
+                elif 'promotiontest' in die_code:
+                    game.chessboard[0][3].die()
+                    game.pieces['wp4'].pos = [0, 3]
+                    die_code = ''
                 if len(die_code) >= 64:
                     die_code = ''
-            if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
+            if event.type == MOUSEBUTTONDOWN and not gameover:
+                if event.button == 1 and promotion:
+                    pos = event.pos
+                    aim = (pos[1] - 420) // 40
+                    if aim >= 0 and aim < 4:
+                        print(aim)
+                        if round == '白':
+                            promotion_aim = promotion_choies[aim]
+                        else:
+                            promotion_aim = promotion_choies[aim + 4]
+                        promotion_aim.pos = promotion
+                        game.pieces[game.get_chess(promotion)] = promotion_aim
+                        promotion = False
+                if event.button == 1 and not promotion:
                     pos = event.pos
                     x, y = (pos[0] - 25) // 80, (pos[1] - 25) // 80
                     if x < 0 or x > 7 or y < 0 or y > 7:
@@ -104,6 +135,16 @@ def main():
         screen.blit(font_round, (700, 25))
         screen.blit(score_white, (690, 70))
         screen.blit(score_black, (690, 110))
+        # 兵升变
+        promotion = game.promotion()
+        if promotion:
+            pygame.draw.rect(screen, WHITE, (680, 400, 110, 200), 4)
+            choies = ['皇后', '象', '马', '车']
+            if pos[0] > 680 and pos[0] < 880 and pos[1] > 420 and pos[1] < 580:
+                pygame.draw.rect(screen, (99, 99, 99), (684, (pos[1] - 420) // 40 * 40 + 420, 100, 40))
+            for i in range(4):
+                choies[i] = font_slim.render(choies[i], True, WHITE)
+                screen.blit(choies[i], (690, 420 + 40 * i))
         if game.game_over():
             win = font.render(' '.join(game.game_over()), True, BLACK)
             if game.game_over()[0] == '白':
