@@ -63,19 +63,15 @@ def main():
                         game.pieces['bp' + str(cell)] = chess.Queen_black()
                         game.pieces['bp' + str(cell)].pos = pos
                     die_code = ''
-                elif 'promotiontest' in die_code:
-                    game.chessboard[0][3].die()
-                    game.pieces['wp4'].pos = [0, 3]
-                    die_code = ''
                 if len(die_code) >= 64:
                     die_code = ''
             if event.type == MOUSEBUTTONDOWN and not gameover:
                 if event.button == 1 and promotion:
                     pos = event.pos
                     aim = (pos[1] - 420) // 40
-                    if aim >= 0 and aim < 4:
-                        print(aim)
-                        if round == '白':
+                    if aim >= 0 and aim < 4 and pos[0] > 680 and pos[0] < 780:
+                        # 此处因为回合提前发生了变化，因此反向改变
+                        if round == '黑':
                             promotion_aim = promotion_choies[aim]
                         else:
                             promotion_aim = promotion_choies[aim + 4]
@@ -140,7 +136,7 @@ def main():
         if promotion:
             pygame.draw.rect(screen, WHITE, (680, 400, 110, 200), 4)
             choies = ['皇后', '象', '马', '车']
-            if pos[0] > 680 and pos[0] < 880 and pos[1] > 420 and pos[1] < 580:
+            if pos[0] > 680 and pos[0] < 780 and pos[1] > 420 and pos[1] < 580:
                 pygame.draw.rect(screen, (99, 99, 99), (684, (pos[1] - 420) // 40 * 40 + 420, 100, 40))
             for i in range(4):
                 choies[i] = font_slim.render(choies[i], True, WHITE)
