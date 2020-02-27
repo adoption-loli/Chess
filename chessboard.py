@@ -110,14 +110,18 @@ def main():
                         pass
                     else:
                         if game.chessboard[y][x].attr:
-                            if game.chessboard[y][x].attr == round:
-                                print('{attr}{name}被选中'.format(attr=game.chessboard[y][x].attr,
-                                                               name=game.chessboard[y][x].name))
-                                sx, sy = x, y
-                                selected_pos = [x, y]
-                                selected_chess = True
+                            if [x, y] == selected_pos:
+                                selected_chess = False
+                                selected_pos = []
                             else:
-                                print('未选中任何{round}棋'.format(round=round))
+                                if game.chessboard[y][x].attr == round:
+                                    print('{attr}{name}被选中'.format(attr=game.chessboard[y][x].attr,
+                                                                   name=game.chessboard[y][x].name))
+                                    sx, sy = x, y
+                                    selected_pos = [x, y]
+                                    selected_chess = True
+                                else:
+                                    print('未选中任何{round}棋'.format(round=round))
                         if selected_chess:
                             tx, ty = x, y
                             if game.player(sx, sy, tx, ty):
@@ -139,7 +143,7 @@ def main():
             # pygame.draw.rect(screen, (99, 99, 99), (25 + 80 * selected_pos[0], 25 + 80 * selected_pos[1], 80, 80))
             tip = tips([selected_pos[0], selected_pos[1]])
             for cell in tip:
-                pygame.draw.rect(screen, (68, 187, 92), (30 + 80 * cell[0], 30 + 80 * cell[1], 70, 70))
+                pygame.draw.rect(screen, (21, 148, 230), (30 + 80 * cell[0], 30 + 80 * cell[1], 70, 70))
         pos = pygame.mouse.get_pos()
         x, y = (pos[0] - 25) // 80, (pos[1] - 25) // 80
         if x < 0 or x > 7 or y < 0 or y > 7:

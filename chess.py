@@ -339,9 +339,9 @@ class Pawn_white():
     def move(self, start_point, end_point, chessboard):
         # 移动棋子
         # 向上走 (白兵是向上走)
-        if chessboard[start_point[0]-1][start_point[1]].attr:
-            return False
         if start_point[1] == end_point[1]:
+            if chessboard[start_point[0] - 1][start_point[1]].attr:
+                return False
             if end_point[0] - start_point[0] == -1:
                 if chessboard[end_point[0]][end_point[1]].attr:
                     return False
@@ -359,6 +359,8 @@ class Pawn_white():
         if self.first:
             # 向下走两步
             if start_point[1] == end_point[1]:
+                if chessboard[start_point[0] - 1][start_point[1]].attr:
+                    return False
                 if end_point[0] - start_point[0] == -2:
                     if chessboard[end_point[0]][end_point[1]].attr:
                         return False
@@ -509,9 +511,9 @@ class Pawn_black():
     def move(self, start_point, end_point, chessboard):
         # 移动棋子
         # 向下走
-        if chessboard[start_point[0]+1][start_point[1]].attr:
-            return False
         if start_point[1] == end_point[1]:
+            if chessboard[start_point[0] + 1][start_point[1]].attr:
+                return False
             if end_point[0] - start_point[0] == 1:
                 if chessboard[end_point[0]][end_point[1]].attr:
                     return False
@@ -529,6 +531,8 @@ class Pawn_black():
         if self.first:
             # 向下走两步
             if start_point[1] == end_point[1]:
+                if chessboard[start_point[0] + 1][start_point[1]].attr:
+                    return False
                 if end_point[0] - start_point[0] == 2:
                     if chessboard[end_point[0]][end_point[1]].attr:
                         return False
