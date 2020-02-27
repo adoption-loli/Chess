@@ -147,7 +147,7 @@ class game():
                     print('%4s' % col.name, end='')
                 print('')
 
-    def player(self, x, y, tx, ty):
+    def player(self, x, y, tx, ty, virtual=False):
         # 玩家落子
         # x = int(input('x：')) - 1
         # y = int(input('y：')) - 1
@@ -163,7 +163,7 @@ class game():
                     return False
             if self.chessboard[y][x].move(start_point, end_point, self.chessboard):
                 # 成功移动判断是否吃子
-                if self.chessboard[ty][tx].attr:
+                if self.chessboard[ty][tx].attr and not virtual:
                     self.chessboard[ty][tx].die()
                     return '{attr}{name}被吃了'.format(attr=self.chessboard[ty][tx].attr,
                                                     name=self.chessboard[ty][tx].name)
@@ -212,7 +212,7 @@ class King_white():
 
     def move(self, start_point, end_point, chessboard):
         # 移动棋子
-        if fabs(start_point[0] - end_point[0]) <= 1 and fabs(start_point[1] - end_point[1]):
+        if fabs(start_point[0] - end_point[0]) <= 1 and fabs(start_point[1] - end_point[1]) <= 1:
             self.pos = end_point
             return True
         else:
@@ -339,6 +339,8 @@ class Pawn_white():
     def move(self, start_point, end_point, chessboard):
         # 移动棋子
         # 向上走 (白兵是向上走)
+        if chessboard[start_point[0]-1][start_point[1]].attr:
+            return False
         if start_point[1] == end_point[1]:
             if end_point[0] - start_point[0] == -1:
                 if chessboard[end_point[0]][end_point[1]].attr:
@@ -380,7 +382,7 @@ class King_black():
 
     def move(self, start_point, end_point, chessboard):
         # 移动棋子
-        if fabs(start_point[0] - end_point[0]) <= 1 and fabs(start_point[1] - end_point[1]):
+        if fabs(start_point[0] - end_point[0]) <= 1 and fabs(start_point[1] - end_point[1]) <= 1:
             self.pos = end_point
             return True
         else:
@@ -507,6 +509,8 @@ class Pawn_black():
     def move(self, start_point, end_point, chessboard):
         # 移动棋子
         # 向下走
+        if chessboard[start_point[0]+1][start_point[1]].attr:
+            return False
         if start_point[1] == end_point[1]:
             if end_point[0] - start_point[0] == 1:
                 if chessboard[end_point[0]][end_point[1]].attr:

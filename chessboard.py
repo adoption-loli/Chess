@@ -11,6 +11,32 @@ screen = pygame.display.set_mode(bg_size)
 pygame.display.set_caption('将来做成萝莉象棋')
 font = pygame.font.Font('msyhbd.ttf', 25)
 font_slim = pygame.font.Font('msyh.ttf', 25)
+ico = pygame.image.load('imgs/123.ico').convert_alpha()
+pygame.display.set_icon(ico)
+game = chess.game()
+
+
+def tips(start_point):
+    '''
+    :param start_point: [x, y]
+    :return: [[x1, y1],[x2, y2],]
+    '''
+    tip = []
+    x, y = start_point
+    aim = game.chessboard[y][x]
+    pawn = False
+    first = False
+    if aim.name == '兵':
+        first = aim.first
+        pawn = True
+    for cell in game.board_range:
+        if cell != start_point:
+            if game.player(x, y, cell[0], cell[1], virtual=True):
+                tip.append(cell)
+            aim.pos = [y, x]
+            if pawn:
+                aim.first = first
+    return tip
 
 
 def draw_chessborad():
@@ -27,7 +53,6 @@ def draw_chessborad():
 
 def main():
     clock = pygame.time.Clock()
-    game = chess.game()
     selected_chess = False
     selected_pos = []
     round = '白'
@@ -84,7 +109,7 @@ def main():
                     if x < 0 or x > 7 or y < 0 or y > 7:
                         pass
                     else:
-                        if game.chessboard[y][x].attr and not selected_chess:
+                        if game.chessboard[y][x].attr:
                             if game.chessboard[y][x].attr == round:
                                 print('{attr}{name}被选中'.format(attr=game.chessboard[y][x].attr,
                                                                name=game.chessboard[y][x].name))
@@ -93,27 +118,40 @@ def main():
                                 selected_chess = True
                             else:
                                 print('未选中任何{round}棋'.format(round=round))
-                        elif selected_chess:
+                        if selected_chess:
                             tx, ty = x, y
-                            selected_chess = False
-                            selected_pos = []
                             if game.player(sx, sy, tx, ty):
                                 if round == '白':
                                     round = '黑'
                                 else:
                                     round = '白'
+                                selected_chess = False
+                                selected_pos = []
         # 画棋盘
         screen.fill(BLACK)
         draw_chessborad()
         # 画选中区域
         if selected_pos:
-            pygame.draw.rect(screen, (99, 99, 99), (25 + 80 * selected_pos[0], 25 + 80 * selected_pos[1], 80, 80))
+            select = pygame.Surface((80, 80))
+            select.set_colorkey(BLACK)
+            pygame.draw.rect(select, (237, 87, 116), (2, 2, 76, 76), 3)
+            screen.blit(select, (25 + 80 * selected_pos[0], 25 + 80 * selected_pos[1]))
+            # pygame.draw.rect(screen, (99, 99, 99), (25 + 80 * selected_pos[0], 25 + 80 * selected_pos[1], 80, 80))
+            tip = tips([selected_pos[0], selected_pos[1]])
+            for cell in tip:
+                pygame.draw.rect(screen, (68, 187, 92), (30 + 80 * cell[0], 30 + 80 * cell[1], 70, 70))
         pos = pygame.mouse.get_pos()
         x, y = (pos[0] - 25) // 80, (pos[1] - 25) // 80
         if x < 0 or x > 7 or y < 0 or y > 7:
             pass
         else:
-            pygame.draw.rect(screen, (170, 170, 170), (25 + 80 * x, 25 + 80 * y, 80, 80))
+            above = pygame.Surface((76, 76))
+            above.fill((80, 243, 243))
+            above.set_alpha(0.5 * 255)
+            if (x + y) % 2:
+                above.set_alpha(0.7 * 255)
+            screen.blit(above, (27 + 80 * x, 27 + 80 * y))
+            # pygame.draw.rect(screen, (204, 0, 255), (30 + 80 * x, 30 + 80 * y, 70, 70))
         game.draw()
         # 画棋子
         for row in range(8):
