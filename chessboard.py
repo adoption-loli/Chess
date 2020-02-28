@@ -3,6 +3,7 @@ from pygame.locals import *
 import chess
 import sys
 
+
 pygame.init()
 bg_size = (800, 690)
 WHITE = (255, 255, 255)
@@ -14,29 +15,6 @@ font_slim = pygame.font.Font('msyh.ttf', 25)
 ico = pygame.image.load('imgs/123.ico').convert_alpha()
 pygame.display.set_icon(ico)
 game = chess.game()
-
-
-def tips(start_point):
-    '''
-    :param start_point: [x, y]
-    :return: [[x1, y1],[x2, y2],]
-    '''
-    tip = []
-    x, y = start_point
-    aim = game.chessboard[y][x]
-    pawn = False
-    first = False
-    if aim.name == '兵':
-        first = aim.first
-        pawn = True
-    for cell in game.board_range:
-        if cell != start_point:
-            if game.player(x, y, cell[0], cell[1], virtual=True):
-                tip.append(cell)
-            aim.pos = [y, x]
-            if pawn:
-                aim.first = first
-    return tip
 
 
 def draw_chessborad():
@@ -60,6 +38,7 @@ def main():
     delay = 30 * 3
     die_code = ''
     score = {'black': 0, 'white': 0}
+    game_mode = 'PVE'
     promotion = False
     promotion_choies = [chess.Queen_white(), chess.Bishop_white(), chess.King_white(), chess.Rook_white(),
                         chess.Queen_black(), chess.Bishop_black(), chess.King_black(), chess.Rook_black()]
@@ -90,7 +69,8 @@ def main():
                     die_code = ''
                 if len(die_code) >= 64:
                     die_code = ''
-            if event.type == MOUSEBUTTONDOWN and not gameover:
+            # PVP时
+            if event.type == MOUSEBUTTONDOWN and not gameover and game_mode == 'PVP':
                 if event.button == 1 and promotion:
                     pos = event.pos
                     aim = (pos[1] - 420) // 40
@@ -131,6 +111,44 @@ def main():
                                     round = '白'
                                 selected_chess = False
                                 selected_pos = []
+            # PVE P白C黑
+            if event.type == MOUSEBUTTONDOWN and not gameover and game_mode == 'PVE':
+                if event.button == 1 and promotion and round == '黑':
+                    pos = event.pos
+                    aim = (pos[1] - 420) // 40
+                    if aim >= 0 and aim < 4 and pos[0] > 680 and pos[0] < 780:
+                        promotion_aim = promotion_choies[aim]
+                        promotion_aim.pos = promotion
+                        game.pieces[game.get_chess(promotion)] = promotion_aim
+                        promotion = False
+                if event.button == 1 and not promotion and round == '白':
+                    pos = event.pos
+                    x, y = (pos[0] - 25) // 80, (pos[1] - 25) // 80
+                    if x < 0 or x > 7 or y < 0 or y > 7:
+                        pass
+                    else:
+                        if game.chessboard[y][x].attr:
+                            if [x, y] == selected_pos:
+                                selected_chess = False
+                                selected_pos = []
+                            else:
+                                if game.chessboard[y][x].attr == round:
+                                    print('{attr}{name}被选中'.format(attr=game.chessboard[y][x].attr,
+                                                                   name=game.chessboard[y][x].name))
+                                    sx, sy = x, y
+                                    selected_pos = [x, y]
+                                    selected_chess = True
+                                else:
+                                    print('未选中任何{round}棋'.format(round=round))
+                        if selected_chess:
+                            tx, ty = x, y
+                            if game.player(sx, sy, tx, ty):
+                                round = '黑'
+                                selected_chess = False
+                                selected_pos = []
+            if round == '黑' and game_mode == 'PVE':
+                game.computer()
+                round = '白'
         # 画棋盘
         screen.fill(BLACK)
         draw_chessborad()
@@ -141,7 +159,7 @@ def main():
             pygame.draw.rect(select, (237, 87, 116), (2, 2, 76, 76), 3)
             screen.blit(select, (25 + 80 * selected_pos[0], 25 + 80 * selected_pos[1]))
             # pygame.draw.rect(screen, (99, 99, 99), (25 + 80 * selected_pos[0], 25 + 80 * selected_pos[1], 80, 80))
-            tip = tips([selected_pos[0], selected_pos[1]])
+            tip = game.tips([selected_pos[0], selected_pos[1]])
             for cell in tip:
                 pygame.draw.rect(screen, (21, 148, 230), (30 + 80 * cell[0], 30 + 80 * cell[1], 70, 70))
         pos = pygame.mouse.get_pos()

@@ -20,7 +20,7 @@ def between(start_point, end_point, chessboard):
         b = y1 - k * x1
         xmax = max(start_point[1], end_point[1])
         xmin = min(start_point[1], end_point[1])
-        print('y={k}x+{b}\n'.format(k=k, b=b), start_point, end_point)
+        # print('y={k}x+{b}\n'.format(k=k, b=b), start_point, end_point)
         for cell in range(xmin, xmax + 1):
             res.append([int(cell * k + b), cell])
     except:
@@ -29,17 +29,17 @@ def between(start_point, end_point, chessboard):
             # 横线
             xmax = max(start_point[1], end_point[1])
             xmin = min(start_point[1], end_point[1])
-            print('y={y}\n'.format(y=y1), start_point, end_point)
+            # print('y={y}\n'.format(y=y1), start_point, end_point)
             for cell in range(xmin, xmax + 1):
                 res.append([y1, cell])
         else:
             # 竖线
             ymax = max(start_point[0], end_point[0])
             ymin = min(start_point[0], end_point[0])
-            print('x={x}\n'.format(x=x1), start_point, end_point)
+            # print('x={x}\n'.format(x=x1), start_point, end_point)
             for cell in range(ymin, ymax + 1):
                 res.append([cell, x1])
-    print(res[1:])
+    # print(res[1:])
     for cell in res[1:-1]:
         if chessboard[cell[0]][cell[1]].attr:
             return True
@@ -141,11 +141,6 @@ class game():
             if self.pieces[pieces].alive:
                 showboard[self.pieces[pieces].pos[0]][self.pieces[pieces].pos[1]] = self.pieces[pieces]
         self.chessboard = showboard
-        if __name__ == '__main__':
-            for row in showboard:
-                for col in row:
-                    print('%4s' % col.name, end='')
-                print('')
 
     def player(self, x, y, tx, ty, virtual=False):
         # 玩家落子
@@ -171,8 +166,19 @@ class game():
         return False
 
     def computer(self):
-        # 电脑落子
-        pass
+        All_steps = []
+        for piece in self.pieces:
+            if self.pieces[piece].attr == '黑' and self.pieces[piece].alive:
+                pos = self.pieces[piece].pos
+                # pos.reverse()
+                All_steps.append([pos, self.tips([pos[1], pos[0]])])
+        import random
+        aim = random.choice(All_steps)
+        while aim[1] == []:
+            aim = random.choice(All_steps)
+        y, x = aim[0]
+        tx, ty = random.choice(aim[1])
+        self.player(x, y, tx, ty)
 
     def inboard(self, end_point):
         # 检查落子范围是否在棋盘内
@@ -200,6 +206,29 @@ class game():
         for cell in self.pieces:
             if self.pieces[cell] == aim:
                 return cell
+
+    def tips(self, start_point):
+        '''
+        :param start_point: [x, y]
+        :return: [[x1, y1],[x2, y2],]
+        '''
+        tip = []
+        x, y = start_point
+        # print('x={x},y={y}'.format(x=x, y=y))
+        aim = self.chessboard[y][x]
+        pawn = False
+        first = False
+        if aim.name == '兵':
+            first = aim.first
+            pawn = True
+        for cell in self.board_range:
+            if cell != start_point:
+                if self.player(x, y, cell[0], cell[1], virtual=True):
+                    tip.append(cell)
+                aim.pos = [y, x]
+                if pawn:
+                    aim.first = first
+        return tip
 
 
 class King_white():
@@ -550,6 +579,7 @@ class blank():
     def __init__(self):
         self.name = '·'
         self.attr = None
+        self.pos = None
 
 
 if __name__ == '__main__':
