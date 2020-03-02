@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 import chess
 import sys
-
+from pprint import *
 
 pygame.init()
 bg_size = (800, 690)
@@ -40,6 +40,8 @@ def main():
     score = {'black': 0, 'white': 0}
     game_mode = 'PVE'
     promotion = False
+    checking = False
+    playing = False
     promotion_choies = [chess.Queen_white(), chess.Bishop_white(), chess.King_white(), chess.Rook_white(),
                         chess.Queen_black(), chess.Bishop_black(), chess.King_black(), chess.Rook_black()]
     while True:
@@ -67,6 +69,8 @@ def main():
                         game.pieces['bp' + str(cell)] = chess.Queen_black()
                         game.pieces['bp' + str(cell)].pos = pos
                     die_code = ''
+                elif 'print' in die_code:
+                    pygame.display.flip()
                 if len(die_code) >= 64:
                     die_code = ''
             # PVP时
@@ -113,14 +117,17 @@ def main():
                                 selected_pos = []
             # PVE P白C黑
             if event.type == MOUSEBUTTONDOWN and not gameover and game_mode == 'PVE':
-                if event.button == 1 and promotion and round == '黑':
-                    pos = event.pos
-                    aim = (pos[1] - 420) // 40
-                    if aim >= 0 and aim < 4 and pos[0] > 680 and pos[0] < 780:
-                        promotion_aim = promotion_choies[aim]
-                        promotion_aim.pos = promotion
-                        game.pieces[game.get_chess(promotion)] = promotion_aim
-                        promotion = False
+                if event.button == 1:
+                    if promotion:
+                        pos = event.pos
+                        aim = (pos[1] - 420) // 40
+                        if aim >= 0 and aim < 4 and pos[0] > 680 and pos[0] < 780:
+                            promotion_aim = promotion_choies[aim]
+                            promotion_aim.pos = promotion
+                            print(game.pieces[game.get_chess(promotion)].attr)
+                            if game.pieces[game.get_chess(promotion)].attr == '白':
+                                game.pieces[game.get_chess(promotion)] = promotion_aim
+                                promotion = False
                 if event.button == 1 and not promotion and round == '白':
                     pos = event.pos
                     x, y = (pos[0] - 25) // 80, (pos[1] - 25) // 80
@@ -143,12 +150,17 @@ def main():
                         if selected_chess:
                             tx, ty = x, y
                             if game.player(sx, sy, tx, ty):
+                                playing = True
                                 round = '黑'
                                 selected_chess = False
                                 selected_pos = []
-            if round == '黑' and game_mode == 'PVE':
-                game.computer()
-                round = '白'
+                                game.draw()
+
+        if round == '黑' and game_mode == 'PVE' and not playing:
+            game.computer()
+            round = '白'
+        if playing:
+            playing = not playing
         # 画棋盘
         screen.fill(BLACK)
         draw_chessborad()
@@ -174,8 +186,21 @@ def main():
                 above.set_alpha(0.7 * 255)
             screen.blit(above, (27 + 80 * x, 27 + 80 * y))
             # pygame.draw.rect(screen, (204, 0, 255), (30 + 80 * x, 30 + 80 * y, 70, 70))
-        game.draw()
+        # 检测是否将军
+        warning = False
+        if not promotion:
+            warning = game.check_black()
+        if warning:
+            check, king, who = warning
+            pygame.draw.rect(screen, (196, 60, 60), (30 + 80 * king[1], 30 + 80 * king[0], 70, 70))
+            pygame.draw.rect(screen, (196, 60, 60), (30 + 80 * check[1], 30 + 80 * check[0], 70, 70))
+        warning = game.check_white()
+        if warning:
+            check, king, who = warning
+            pygame.draw.rect(screen, (196, 60, 60), (30 + 80 * king[1], 30 + 80 * king[0], 70, 70))
+            pygame.draw.rect(screen, (196, 60, 60), (30 + 80 * check[1], 30 + 80 * check[0], 70, 70))
         # 画棋子
+        game.draw()
         for row in range(8):
             for col in range(8):
                 if game.chessboard[row][col].attr:
@@ -218,7 +243,6 @@ def main():
             delay -= 1
             if not delay:
                 gameover = False
-
         pygame.display.flip()
         clock.tick(30)
 

@@ -48,6 +48,13 @@ def between(start_point, end_point, chessboard):
     return False
 
 
+def after_player(player):
+    def inner(*args, **kwargs):
+        if player(*args, **kwargs):
+            print('画了一次')
+    return inner
+
+
 class game():
     def __init__(self):
         self.blank = blank()
@@ -179,6 +186,14 @@ class game():
         y, x = aim[0]
         tx, ty = random.choice(aim[1])
         self.player(x, y, tx, ty)
+        self.draw()
+        for i in range(8):
+            if self.chessboard[7][i].attr == '黑' and self.chessboard[7][i].name == '兵':
+                aim = self.get_chess([7, i])
+                pos = self.pieces[aim].pos
+                t = Queen_black()
+                t.pos = pos
+                self.pieces[aim] = t
 
     def inboard(self, end_point):
         # 检查落子范围是否在棋盘内
@@ -206,6 +221,7 @@ class game():
         for cell in self.pieces:
             if self.pieces[cell] == aim:
                 return cell
+        return False
 
     def tips(self, start_point):
         '''
@@ -229,6 +245,27 @@ class game():
                 if pawn:
                     aim.first = first
         return tip
+
+    def check_black(self):
+        for piece in self.pieces:
+            if self.pieces[piece].attr == '白' and self.pieces[piece].alive:
+                pos = self.pieces[piece].pos
+                # pos.reverse()
+                droppoint = self.tips([pos[1], pos[0]])
+                if [self.pieces['bk'].pos[1], self.pieces['bk'].pos[0]] in droppoint:
+                    # print(droppoint, [self.pieces['bk'].pos[1], self.pieces['bk'].pos[0]])
+                    return [pos, self.pieces['bk'].pos, '黑']
+        return False
+
+    def check_white(self):
+        for piece in self.pieces:
+            if self.pieces[piece].attr == '黑' and self.pieces[piece].alive:
+                pos = self.pieces[piece].pos
+                # pos.reverse()
+                droppoint = self.tips([pos[1], pos[0]])
+                if [self.pieces['bk'].pos[1], self.pieces['bk'].pos[0]] in droppoint:
+                    return [pos, self.pieces['wk'].pos, '黑']
+        return False
 
 
 class King_white():
@@ -368,6 +405,8 @@ class Pawn_white():
     def move(self, start_point, end_point, chessboard):
         # 移动棋子
         # 向上走 (白兵是向上走)
+        if start_point[0] - 1 < 0:
+            return False
         if start_point[1] == end_point[1]:
             if chessboard[start_point[0] - 1][start_point[1]].attr:
                 return False
@@ -540,6 +579,8 @@ class Pawn_black():
     def move(self, start_point, end_point, chessboard):
         # 移动棋子
         # 向下走
+        if start_point[0] + 1 > 7:
+            return False
         if start_point[1] == end_point[1]:
             if chessboard[start_point[0] + 1][start_point[1]].attr:
                 return False
