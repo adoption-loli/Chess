@@ -24,8 +24,8 @@ class computer():
         weight = []
         for row in All_steps:
             temp = []
-            self.chessboard = self.virtual_chessboard(chessboard)
             for step in row[1]:
+                self.chessboard = self.virtual_chessboard(chessboard)
                 self.player(row[0][1], row[0][0], step[0], step[1])
                 weight_sum = 0
                 for y in self.chessboard:
@@ -34,12 +34,14 @@ class computer():
                             weight_sum += cell.weight
                 temp.append(weight_sum)
             t_min = min(temp)
+            # print(temp)
             t_index = temp.index(t_min)
             weight.append([t_min, t_index])
         t_aim = min(weight)[1]
+        # print(min(weight))
         aim = weight.index(min(weight))
         y, x = All_steps[aim][0]
-        print(aim, t_aim, weight)
+        # print(aim, t_aim, weight, All_steps[aim])
         tx, ty = All_steps[aim][1][t_aim]
         return x, y, tx, ty
 
