@@ -272,7 +272,7 @@ class game():
                 pos = self.pieces[piece].pos
                 # pos.reverse()
                 droppoint = self.tips([pos[1], pos[0]])
-                if [self.pieces['bk'].pos[1], self.pieces['bk'].pos[0]] in droppoint:
+                if [self.pieces['wk'].pos[1], self.pieces['wk'].pos[0]] in droppoint:
                     return [pos, self.pieces['wk'].pos, '黑']
         return False
 

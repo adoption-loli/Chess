@@ -188,8 +188,8 @@ def main():
             # pygame.draw.rect(screen, (204, 0, 255), (30 + 80 * x, 30 + 80 * y, 70, 70))
         # 检测是否将军
         warning = False
-        if not promotion:
-            warning = game.check_black()
+        #if not promotion:
+        warning = game.check_black()
         if warning:
             check, king, who = warning
             pygame.draw.rect(screen, (196, 60, 60), (30 + 80 * king[1], 30 + 80 * king[0], 70, 70))
