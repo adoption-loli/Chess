@@ -1,6 +1,8 @@
 from pprint import *
 from math import *
 import pygame
+from copy import deepcopy
+import computer as cp
 
 
 def between(start_point, end_point, chessboard):
@@ -46,13 +48,6 @@ def between(start_point, end_point, chessboard):
     if chessboard[res[-1][0]][res[-1][1]].attr == chessboard[res[0][0]][res[0][1]].attr:
         return True
     return False
-
-
-def after_player(player):
-    def inner(*args, **kwargs):
-        if player(*args, **kwargs):
-            print('画了一次')
-    return inner
 
 
 class game():
@@ -131,6 +126,7 @@ class game():
         self.pieces['bq'].pos = [0, 3]
         self.chessboard[7][3] = self.pieces['wq']
         self.pieces['wq'].pos = [7, 3]
+        self.amentia = cp.computer()
         for i in range(1, 9):
             self.chessboard[1][i - 1] = self.pieces['bp' + str(i)]
             self.pieces['bp' + str(i)].pos = [1, i - 1]
@@ -173,18 +169,31 @@ class game():
         return False
 
     def computer(self):
+        # 下一步 虚拟棋盘和棋子权值
+        self.draw()
         All_steps = []
         for piece in self.pieces:
             if self.pieces[piece].attr == '黑' and self.pieces[piece].alive:
                 pos = self.pieces[piece].pos
                 # pos.reverse()
-                All_steps.append([pos, self.tips([pos[1], pos[0]])])
-        import random
-        aim = random.choice(All_steps)
-        while aim[1] == []:
-            aim = random.choice(All_steps)
-        y, x = aim[0]
-        tx, ty = random.choice(aim[1])
+                tip = self.tips([pos[1], pos[0]])
+                if tip != []:
+                    All_steps.append([pos, tip])
+        '''
+        All_steps = [
+                        [y, x],
+                        [
+                            [x,y],
+                        ]
+                    ]
+        '''
+        # import random
+        # aim = random.choice(All_steps)
+        # while aim[1] == []:
+        #     aim = random.choice(All_steps)
+        # y, x = aim[0]
+        # tx, ty = random.choice(aim[1])
+        x, y, tx, ty = self.amentia.black(self.chessboard, All_steps)
         self.player(x, y, tx, ty)
         self.draw()
         for i in range(8):
@@ -274,6 +283,7 @@ class King_white():
         self.attr = '白'
         self.alive = True
         self.pos = None
+        self.weight = 999
         self.img = pygame.image.load('imgs/white_king.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -295,6 +305,7 @@ class Queen_white():
         self.attr = '白'
         self.alive = True
         self.pos = None
+        self.weight = 90
         self.img = pygame.image.load('imgs/white_queen.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -331,6 +342,7 @@ class Rook_white():
         self.attr = '白'
         self.alive = True
         self.pos = None
+        self.weight = 50
         self.img = pygame.image.load('imgs/white_rook.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -360,6 +372,7 @@ class Bishop_white():
         self.attr = '白'
         self.alive = True
         self.pos = None
+        self.weight = 30
         self.img = pygame.image.load('imgs/white_bishop.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -380,6 +393,7 @@ class Knight_white():
         self.attr = '白'
         self.alive = True
         self.pos = None
+        self.weight = 30
         self.img = pygame.image.load('imgs/white_knight.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -399,6 +413,7 @@ class Pawn_white():
         self.attr = '白'
         self.alive = True
         self.pos = None
+        self.weight = 10
         self.img = pygame.image.load('imgs/white_pawn.png').convert_alpha()
         self.first = True
 
@@ -448,6 +463,7 @@ class King_black():
         self.attr = '黑'
         self.alive = True
         self.pos = None
+        self.weight = -999
         self.img = pygame.image.load('imgs/black_king.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -469,6 +485,7 @@ class Queen_black():
         self.attr = '黑'
         self.alive = True
         self.pos = None
+        self.weight = -90
         self.img = pygame.image.load('imgs/black_queen.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -505,6 +522,7 @@ class Rook_black():
         self.attr = '黑'
         self.alive = True
         self.pos = None
+        self.weight = -50
         self.img = pygame.image.load('imgs/black_rook.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -534,6 +552,7 @@ class Bishop_black():
         self.attr = '黑'
         self.alive = True
         self.pos = None
+        self.weight = -30
         self.img = pygame.image.load('imgs/black_bishop.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -554,6 +573,7 @@ class Knight_black():
         self.attr = '黑'
         self.alive = True
         self.pos = None
+        self.weight = -30
         self.img = pygame.image.load('imgs/black_knight.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -574,6 +594,7 @@ class Pawn_black():
         self.alive = True
         self.pos = None
         self.first = True
+        self.weight = -10
         self.img = pygame.image.load('imgs/black_pawn.png').convert_alpha()
 
     def move(self, start_point, end_point, chessboard):
@@ -621,6 +642,8 @@ class blank():
         self.name = '·'
         self.attr = None
         self.pos = None
+        self.weight = 0
+        self.alive = False
 
 
 if __name__ == '__main__':
